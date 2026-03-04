@@ -1,0 +1,17 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
+    <SelectDialog id="projectValueHelpDialog" 
+                  title="{i18n>projectSelectTitle}" 
+                  multiSelect="false" 
+                  rememberSelections="false" 
+                  confirm="onProjectVHConfirm" 
+                  cancel="onProjectVHCancel"
+                  search="onProjectVHSearch"
+                  items="{proj>/results}">
+        <StandardListItem title="{proj>Project}" 
+                          description="{proj>ProjectDescription}">
+            <customData>
+                <core:CustomData key="uuid" value="{proj>ProjectUUID}" />
+            </customData>
+        </StandardListItem>
+    </SelectDialog>
+</core:FragmentDefinition>

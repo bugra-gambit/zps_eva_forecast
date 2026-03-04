@@ -1,0 +1,138 @@
+{
+  "_version": "1.76.0",
+  "sap.app": {
+    "id": "com.gambit.evaforecast",
+    "type": "application",
+    "i18n": {
+      "bundleUrl": "i18n/i18n.properties",
+      "supportedLocales": ["", "en", "tr", "de"],
+      "fallbackLocale": ""
+    },
+    "applicationVersion": {
+      "version": "0.0.1"
+    },
+    "title": "{{appTitle}}",
+    "description": "{{appDescription}}",
+    "resources": "resources.json",
+    "sourceTemplate": {
+      "id": "@sap/generator-fiori:basic",
+      "version": "1.20.0",
+      "toolsId": "c6790c03-04a2-4153-9cc3-baf1c2c7df42"
+    },
+    "dataSources": {
+      "ZUI_EVA_PROJECT_V2_VAN": {
+        "uri": "/sap/opu/odata/IWFND/CATALOGSERVICE;v=2/Annotations(TechnicalName='ZUI_EVA_PROJECT_V2_VAN',Version='0001')/$value/",
+        "type": "ODataAnnotation",
+        "settings": {
+          "localUri": "localService/mainService/ZUI_EVA_PROJECT_V2_VAN.xml"
+        }
+      },
+      "mainService": {
+        "uri": "/sap/opu/odata/sap/ZUI_EVA_PROJECT_V2/",
+        "type": "OData",
+        "settings": {
+          "annotations": ["ZUI_EVA_PROJECT_V2_VAN"],
+          "localUri": "localService/mainService/metadata.xml",
+          "odataVersion": "2.0"
+        }
+      }
+    },
+    "crossNavigation": {
+      "inbounds": {
+        "ZPS_EVA_FC_SEMOBJ-display": {
+          "semanticObject": "ZPS_EVA_FC_SEMOBJ",
+          "action": "display",
+          "title": "{{ZPS_EVA_FC_SEMOBJ-display.flpTitle}}",
+          "signature": {
+            "parameters": {},
+            "additionalParameters": "allowed"
+          }
+        }
+      }
+    }
+  },
+  "sap.ui": {
+    "technology": "UI5",
+    "icons": {
+      "icon": "",
+      "favIcon": "",
+      "phone": "",
+      "phone@2": "",
+      "tablet": "",
+      "tablet@2": ""
+    },
+    "deviceTypes": {
+      "desktop": true,
+      "tablet": true,
+      "phone": true
+    }
+  },
+  "sap.ui5": {
+    "flexEnabled": false,
+    "dependencies": {
+      "minUI5Version": "1.142.7",
+      "libs": {
+        "sap.m": {},
+        "sap.ui.core": {}
+      }
+    },
+    "contentDensities": {
+      "compact": true,
+      "cozy": true
+    },
+    "models": {
+      "i18n": {
+        "type": "sap.ui.model.resource.ResourceModel",
+        "settings": {
+          "bundleName": "com.gambit.evaforecast.i18n.i18n",
+          "supportedLocales": ["", "en", "tr", "de"],
+          "fallbackLocale": ""
+        }
+      },
+      "": {
+        "dataSource": "mainService",
+        "preload": true,
+        "settings": {}
+      }
+    },
+    "resources": {
+      "css": [
+        {
+          "uri": "css/style.css"
+        }
+      ]
+    },
+    "routing": {
+      "config": {
+        "routerClass": "sap.m.routing.Router",
+        "controlAggregation": "pages",
+        "controlId": "app",
+        "transition": "slide",
+        "type": "View",
+        "viewType": "XML",
+        "path": "com.gambit.evaforecast.view",
+        "async": true,
+        "viewPath": "com.gambit.evaforecast.view"
+      },
+      "routes": [
+        {
+          "name": "RouteWorklist",
+          "pattern": ":?query:",
+          "target": ["TargetWorklist"]
+        }
+      ],
+      "targets": {
+        "TargetWorklist": {
+          "id": "Worklist",
+          "name": "Worklist"
+        }
+      }
+    },
+    "rootView": {
+      "viewName": "com.gambit.evaforecast.view.App",
+      "type": "XML",
+      "id": "App",
+      "async": true
+    }
+  }
+}

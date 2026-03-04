@@ -1,0 +1,25 @@
+# yaml-language-server: $schema=https://sap.github.io/ui5-tooling/schema/ui5.yaml.json
+
+specVersion: "4.0"
+metadata:
+  name: com.gambit.evaforecast
+type: application
+builder:
+  resources:
+    excludes:
+      - /test/**
+      - /localService/**
+  customTasks:
+    - name: deploy-to-abap
+      afterTask: generateCachebusterInfo
+      configuration:
+        target:
+          url: https://my403233.s4hana.cloud.sap/
+          authenticationType: reentranceTicket # SAML support for vscode
+        app:
+          name: ZUI_EVA_FORECST
+          description: EVA Forecast
+          package: ZPS_EVA
+          transport: LYTK902308
+        exclude:
+          - /test/

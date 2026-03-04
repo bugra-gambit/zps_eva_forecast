@@ -1,0 +1,33 @@
+/* Enter your custom styles here */
+/* Progress column optimization */
+.sapMTable .sapMText.sapMColumn {
+  min-width: 20rem;
+}
+
+/* Forecast input styling */
+.sapMTable .sapMInput[placeholder="WD"] {
+  min-width: 3rem;
+}
+
+/* ProgressIndicator responsive */
+.sapMProgressIndicator {
+  margin-top: 0.25rem;
+}
+
+/* Mobile table adjustments */
+@media (max-width: 599px) {
+  .sapMTable .sapMTableCell {
+    padding: 0.5rem 0.25rem;
+  }
+
+  .sapMInput {
+    font-size: 0.875rem;
+  }
+}
+
+/* Tablet adjustments */
+@media (max-width: 1023px) {
+  .sapMTable .sapMColumn > .sapMLabel {
+    font-size: 0.875rem;
+  }
+}

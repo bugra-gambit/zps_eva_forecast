@@ -1,0 +1,97 @@
+<mvc:View controllerName="com.gambit.evaforecast.controller.Worklist"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:formatter="com.gambit.evaforecast.model.formatter">
+
+    <Page id="page">
+        <headerContent>
+        </headerContent>
+        <footer>
+            <OverflowToolbar>
+                <HBox alignItems="Center">
+                    <Label text="{i18n>currentPeriodLabel}:" class="sapUiTinyMarginEnd" design="Bold"/>
+                    <Input value="{
+                            path: 'local>/currentPeriod',
+                            type: 'sap.ui.model.type.Date',
+                            formatOptions: { style: 'medium' }
+                        }" 
+                        editable="false" 
+                        width="10rem" 
+                        class="sapUiMediumMarginEnd" />
+                    
+                    <Label text="{i18n>previousPeriodLabel}:" class="sapUiTinyMarginEnd" design="Bold"/>
+                    <Input value="{
+                            path: 'local>/previousPeriod',
+                            type: 'sap.ui.model.type.Date',
+                            formatOptions: { style: 'medium' }
+                        }" 
+                        editable="false" 
+                        width="10rem" />
+                </HBox>
+
+                <ToolbarSpacer/>
+                
+                <Button text="{i18n>saveButton}" type="Emphasized" press="onSave" />
+            </OverflowToolbar>
+        </footer>
+        <content>
+            <Panel width="auto" headerText="{i18n>projectProgressTitle}" expandable="false" class="sapUiResponsiveMargin">
+                <VBox alignItems="Start" width="100%">
+                    <HBox alignItems="Center" wrap="Wrap" width="100%">
+                        <Label required="true" text="{i18n>projectLabel}" class="sapUiResponsiveMargin"/>
+                        <Input id="projectInput" showValueHelp="true" value="{local>/selectedProjectText}"
+                               valueHelpRequest="onProjectValueHelp" width="auto" class="sapUiSmallMarginEnd" />
+                                 <Label text="{i18n>projectDescLabel} :" class="sapUiTinyMarginEnd"/>
+                        <Input value="{local>/selectedProjectDesc}" editable="false" width="13rem" class="sapUiSmallMarginEnd"/>
+                        <Label text="{i18n>projectStartLabel} :" class="sapUiTinyMarginEnd"/>
+                        <Input value="{local>/selectedProjectStart}" editable="false" width="8rem" class="sapUiSmallMarginEnd"/>
+                        <Label text="{i18n>projectEndLabel} :" class="sapUiTinyMarginEnd"/>
+                        <Input value="{local>/selectedProjectEnd}" editable="false" width="8rem" class="sapUiSmallMarginEnd"/>
+                        <Label text="{i18n>projectIntervalLabel} :" class="sapUiTinyMarginEnd"/>
+                        <Input value="{local>/selectedProjectInterval}" editable="false" width="8rem" class="sapUiSmallMarginEnd"/>
+                        <Label text="{i18n>projectParentLabel} :" class="sapUiTinyMarginEnd"/>
+                        <Input value="{local>/selectedProjectParent}" editable="false" width="8rem" class="sapUiSmallMarginEnd"/>
+                        <Button text="{i18n>goButton}" type="Emphasized" width="5rem" press="onProjectGo" class="sapUiSmallMarginBegin" />
+                    </HBox>
+                </VBox>
+            </Panel>
+
+            <Table id="workpackageTable" inset="false" width="auto" class="sapUiResponsiveMargin" updateFinished="onTableUpdateFinished">
+            <headerToolbar>
+                    <OverflowToolbar>
+                        <Title text="{local>/tableTitle}" />
+                        <ToolbarSpacer/>
+                        <SearchField 
+                            width="20rem" 
+                            placeholder="{i18n>searchWorkPackagePlaceholder}" 
+                            liveChange="onSearch" />
+                    </OverflowToolbar>
+                </headerToolbar>
+                <columns>
+                    <Column width="10rem" minScreenWidth="tablet" popinDisplay="Block">
+                        <header><Label text="{i18n>streamColumn}"/></header>
+                    </Column>
+                    <Column width="12rem" minScreenWidth="tablet" popinDisplay="Block">
+                        <header><Label text="{i18n>workPackageColumn}"/></header>
+                    </Column>
+                    <Column width="6rem" minScreenWidth="tablet" popinDisplay="Block">
+                        <header><Label text="{i18n>initBudgetDaysColumn}"/></header>
+                    </Column>
+                    <Column width="7rem" minScreenWidth="tablet" popinDisplay="Block">
+                        <header><Label text="{i18n>initBudgetColumn}"/></header>
+                    </Column>
+                    <Column width="15rem" minScreenWidth="tablet" popinDisplay="Block">
+                        <header><Label text="{i18n>progressColumn}"/></header>
+                    </Column>
+                    <Column width="5rem" minScreenWidth="tablet" popinDisplay="Block">
+                        <header><Label text="{i18n>remainingDaysColumn}"/></header>
+                    </Column>
+                    <Column width="14rem" minScreenWidth="tablet" popinDisplay="Block">
+                        <header><Label text="{i18n>lastCycleColumn}"/></header>
+                    </Column>
+                </columns>
+            </Table>
+        </content>
+    </Page>
+</mvc:View>

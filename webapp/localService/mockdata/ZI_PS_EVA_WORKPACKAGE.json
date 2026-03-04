@@ -1,0 +1,33 @@
+{
+  "d": {
+    "results": [
+      {
+        "ProjectElement": "WP1",
+        "ProjectUUID": "0001",
+        "ProjectElementDescription": "Stream A",
+        "EVACurrentForecastPoC": 25,
+        "EVACurrentForecastEtC": 5,
+        "EVAPreviousForecastPoC": 20,
+        "EVAPreviousForecastEtC": 7
+      },
+      {
+        "ProjectElement": "WP2",
+        "ProjectUUID": "0001",
+        "ProjectElementDescription": "Stream B",
+        "EVACurrentForecastPoC": 50,
+        "EVACurrentForecastEtC": 15,
+        "EVAPreviousForecastPoC": 45,
+        "EVAPreviousForecastEtC": 12
+      },
+      {
+        "ProjectElement": "WP3",
+        "ProjectUUID": "0002",
+        "ProjectElementDescription": "Stream X",
+        "EVACurrentForecastPoC": 10,
+        "EVACurrentForecastEtC": 20,
+        "EVAPreviousForecastPoC": 5,
+        "EVAPreviousForecastEtC": 25
+      }
+    ]
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "d": {
+    "results": [
+      {
+        "ProjectUUID": "0001",
+        "Project": "PRJ1",
+        "ProjectDescription": "First project"
+      },
+      {
+        "ProjectUUID": "0002",
+        "Project": "PRJ2",
+        "ProjectDescription": "Second project"
+      }
+    ]
+  }
+}

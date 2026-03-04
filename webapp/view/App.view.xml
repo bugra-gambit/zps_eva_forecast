@@ -1,0 +1,9 @@
+<mvc:View controllerName="com.gambit.evaforecast.controller.App"
+    displayBlock="true"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m">
+    <Shell appWidthLimited="false">
+    <App id="app">
+    </App>
+    </Shell>
+</mvc:View>
