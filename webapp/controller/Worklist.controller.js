@@ -188,21 +188,33 @@ sap.ui.define([
 
         onProjectVHConfirm: function (oEvent) {
             var oSelected = oEvent.getParameter("selectedItem");
-            var that = this;
             if (oSelected) {
                 var sUUID = oSelected.data("uuid");
+
+
                 var sText = oSelected.getTitle() + " - " + oSelected.getDescription();
                 this._selectedProject = sUUID;
                 this.getView().getModel("local").setProperty("/selectedProjectText", sText);
 
-                // Proje detaylarını seçilmiş item'den doğrudan al
                 var oSelectedData = oSelected.getBindingContext("proj").getObject();
                 var oLocal = this.getView().getModel("local");
+
                 oLocal.setProperty("/selectedProjectId", oSelectedData.Project || "");
-                oLocal.setProperty("/selectedProjectDesc", oSelectedData.ProjectDescription || "");
+
+
+
                 oLocal.setProperty("/selectedProjectStart", oSelectedData.ProjectStartDate ? this._formatDate(oSelectedData.ProjectStartDate) : "");
                 oLocal.setProperty("/selectedProjectEnd", oSelectedData.ProjectEndDate ? this._formatDate(oSelectedData.ProjectEndDate) : "");
-                oLocal.setProperty("/selectedProjectInterval", oSelectedData.YY1_EVAIntervall_Cpr || "");
+
+
+                var sInterval = oSelectedData.YY1_EVAIntervall_Cpr || "";
+                if (sInterval === "101") {
+                    sInterval = "101: weekly";
+                } else if (sInterval === "102") {
+                    sInterval = "102: monthly";
+                }
+                oLocal.setProperty("/selectedProjectInterval", sInterval);
+
                 oLocal.setProperty("/selectedProjectParent", oSelectedData.YY1_ParentProject_Cpr || "");
             }
             this._oProjectVHDialog.close();
@@ -214,7 +226,6 @@ sap.ui.define([
             var oDate;
 
             if (typeof date === "string") {
-
                 if (date.indexOf("/Date(") === 0) {
                     oDate = new Date(parseInt(date.slice(6, -2), 10));
                 } else {
@@ -230,12 +241,12 @@ sap.ui.define([
                 return "";
             }
 
-
             var sMonth = String(oDate.getMonth() + 1).padStart(2, '0');
             var sDay = String(oDate.getDate()).padStart(2, '0');
             var sYear = oDate.getFullYear();
 
-            return sMonth + "/" + sDay + "/" + sYear;
+
+            return sDay + "." + sMonth + "." + sYear;
         },
 
 
@@ -272,7 +283,7 @@ sap.ui.define([
 
 
 
-        // onSave: function () {
+
         //     var oModel = this.getView().getModel();
         //     var oResourceBundle = this.getView().getModel("i18n").getResourceBundle();
 
@@ -323,15 +334,14 @@ sap.ui.define([
 
             var oPendingChanges = oModel.getPendingChanges();
 
-            // İşlevsiz obje manipülasyonu yerine modelin kendisini güncelliyoruz
+
             for (var sPath in oPendingChanges) {
                 if (sPath.indexOf("ZI_PS_EVA_WORKPACKAGE") > -1) {
                     var aMatch = sPath.match(/'([^']+)'/);
                     if (aMatch && aMatch[1]) {
                         var sProjectElement = aMatch[1];
 
-                        // Model üzerinden değerleri set ediyoruz. 
-                        // Bu sayede OData bu alanları "değiştirildi" olarak algılayıp payload'a ekler.
+
                         oModel.setProperty("/" + sPath + "/ProjectElement", sProjectElement);
                         oModel.setProperty("/" + sPath + "/ProjectUUID", this._selectedProject);
                     }
@@ -342,7 +352,7 @@ sap.ui.define([
                 success: function (oData) {
                     this.getView().setBusy(false);
 
-                    // Batch hatalarını yakalamak için (önceki mesajlarda belirttiğim gibi)
+
                     if (oData && oData.__batchResponses && oData.__batchResponses.find(r => r.statusCode >= "400")) {
                         sap.m.MessageBox.error(oResourceBundle.getText("saveError"));
                     } else {
@@ -359,7 +369,7 @@ sap.ui.define([
             var oTable = oEvent.getSource();
             var aItems = oTable.getItems();
 
-            // Tabloda veri yoksa işlemi sonlandır
+
             if (aItems.length === 0) {
                 return;
             }
@@ -368,14 +378,14 @@ sap.ui.define([
             var dCurrentPeriod = null;
             var dPreviousPeriod = null;
 
-            // Satırlar arasında döngü kurup, 'null' olmayan ilk geçerli tarihi buluyoruz
+
             for (var i = 0; i < aItems.length; i++) {
                 var oContext = aItems[i].getBindingContext();
                 if (oContext) {
                     var tempCurrent = oContext.getProperty("CurrentReportingPeriodStart");
                     var tempPrevious = oContext.getProperty("PreviousReportingPeriodStart");
 
-                    // Eğer Current veya Previous doluysa, değişkenlere ata ve döngüyü kır
+
                     if (tempCurrent || tempPrevious) {
                         dCurrentPeriod = tempCurrent;
                         dPreviousPeriod = tempPrevious;
@@ -384,7 +394,7 @@ sap.ui.define([
                 }
             }
 
-            // Bulduğumuz verileri Local Model'e set ediyoruz. (Eğer hepsi null ise null kalacak)
+
             oLocalModel.setProperty("/currentPeriod", dCurrentPeriod);
             oLocalModel.setProperty("/previousPeriod", dPreviousPeriod);
         },
@@ -394,7 +404,7 @@ sap.ui.define([
             var oTable = this.byId("workpackageTable");
             var oBinding = oTable.getBinding("items");
 
-            // 1. Arama Çubuğundaki Metin İçin Filtre (OR)
+
             if (sQuery && sQuery.length > 0) {
                 var filterById = new sap.ui.model.Filter("ProjectElement", sap.ui.model.FilterOperator.Contains, sQuery);
                 var filterByDesc = new sap.ui.model.Filter("ProjectElementDescription", sap.ui.model.FilterOperator.Contains, sQuery);
@@ -406,10 +416,7 @@ sap.ui.define([
                 aFilters.push(oCombinedFilter);
             }
 
-            // 2. Proje Filtresi (Gerçek GUID kullanılmalı!)
-            // Daha önceki kodlarında this._selectedProject içinde GUID tuttuğunu gördüm.
-            // Eğer local modelinde GUID "selectedProjectUUID" gibi bir alanda tutuluyorsa onu almalısın.
-            var sProjectUUID = this._selectedProject; // veya this.getView().getModel("local").getProperty("/selectedProjectUUID");
+
 
             if (sProjectUUID) {
                 var oProjectFilter = new sap.ui.model.Filter("ProjectUUID", sap.ui.model.FilterOperator.EQ, sProjectUUID);
@@ -421,11 +428,11 @@ sap.ui.define([
                     });
                     oBinding.filter(oFinalFilter, "Application");
                 } else {
-                    // Arama çubuğu temizlendiyse sadece proje filtresini uygula
+
                     oBinding.filter([oProjectFilter], "Application");
                 }
             } else {
-                // Fallback: Proje GUID'i yoksa sadece text filtresini gönder
+
                 oBinding.filter(aFilters, "Application");
             }
         }
