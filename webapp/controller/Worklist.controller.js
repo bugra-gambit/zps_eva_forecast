@@ -440,7 +440,10 @@ sap.ui.define([
                         columns: [
                             new Column({ header: new Label({ text: oResourceBundle.getText("historyProjectColumn") }) }),
                             new Column({ header: new Label({ text: oResourceBundle.getText("historyWPColumn") }) }),
-                            new Column({ header: new Label({ text: oResourceBundle.getText("historyPeriodColumn") }) })
+                            new Column({ header: new Label({ text: oResourceBundle.getText("historyPeriodColumn") }) }),
+                            new Column({ header: new Label({ text: oResourceBundle.getText("historyPeriodEndColumn") }) }),
+                            new Column({ header: new Label({ text: oResourceBundle.getText("historyLastChangedAtColumn") }) }),
+                            new Column({ header: new Label({ text: oResourceBundle.getText("historyLastChangedByColumn") }) })
                         ]
                     });
 
@@ -455,14 +458,28 @@ sap.ui.define([
                                         path: "history>reportingperiodstart",
                                         type: new sap.ui.model.type.Date({ pattern: "dd.MM.yyyy" })
                                     }
-                                })
+                                }),
+                                new Text({
+                                    text: {
+                                        path: "history>reportingperiodend",
+                                        type: new sap.ui.model.type.Date({ pattern: "dd.MM.yyyy" })
+                                    }
+                                }),
+                                new Text({
+                                    text: {
+                                        path: "history>lastchangedat",
+                                        type: new sap.ui.model.type.DateTime({ pattern: "dd.MM.yyyy HH:mm" })
+                                    }
+                                }),
+                                new Text({ text: "{history>lastchangedby}" })
                             ]
                         })
                     });
 
                     that._oHistoryDialog = new Dialog({
                         title: oResourceBundle.getText("historyDialogTitle") + " - " + sProjectElement,
-                        contentWidth: "40rem",
+                        contentWidth: "60rem",
+                        contentHeight: "25rem",
                         resizable: true,
                         draggable: true,
                         content: [oHistoryTable],
