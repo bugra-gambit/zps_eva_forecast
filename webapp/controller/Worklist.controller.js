@@ -8,8 +8,13 @@ sap.ui.define([
     "sap/m/Text",
     "sap/m/Input",
     "sap/m/VBox",
-    "sap/m/ProgressIndicator"
-], (Controller, Filter, FilterOperator, MessageToast, MessageBox, ColumnListItem, Text, Input, VBox, ProgressIndicator) => {
+    "sap/m/ProgressIndicator",
+    "sap/m/Button",
+    "sap/m/Dialog",
+    "sap/m/Table",
+    "sap/m/Column",
+    "sap/m/Label"
+], (Controller, Filter, FilterOperator, MessageToast, MessageBox, ColumnListItem, Text, Input, VBox, ProgressIndicator, Button, Dialog, Table, Column, Label) => {
     "use strict";
 
     return Controller.extend("com.gambit.evaforecast.controller.Worklist", {
@@ -100,24 +105,20 @@ sap.ui.define([
                                 }
                             }
                         }),
-                        new VBox({
+                        new Input({
+                            value: {
+                                path: "EVACurrentForecastPoC",
+                                type: new sap.ui.model.type.Integer(),
+                                mode: sap.ui.model.BindingMode.TwoWay
+                            },
+                            liveChange: this.onProgressLiveChange.bind(this),
                             width: "100%",
-                            items: [
-                                new Input({
-                                    value: {
-                                        path: "EVACurrentForecastPoC",
-                                        type: new sap.ui.model.type.Integer(),
-                                        mode: sap.ui.model.BindingMode.TwoWay
-                                    },
-                                    liveChange: this.onProgressLiveChange.bind(this),
-                                    width: "95%"
-                                }),
-                                new ProgressIndicator({
-                                    percentValue: "{EVACurrentForecastPoC}",
-                                    displayValue: "{= ${EVACurrentForecastPoC} + ' %'}",
-                                    width: "100%"
-                                })
-                            ]
+                            maxLength: 3
+                        }),
+                        new ProgressIndicator({
+                            percentValue: "{EVACurrentForecastPoC}",
+                            displayValue: "{= ${EVACurrentForecastPoC} + ' %'}",
+                            width: "100%"
                         }),
                         new Input({
                             value: {
@@ -132,6 +133,12 @@ sap.ui.define([
                         }),
                         new Text({
                             text: "{= 'Progress: ' + ${EVAPreviousForecastPoC} + ' %, Rem. days: ' + ${EVAPreviousForecastEtC} + ' WD' }"
+                        }),
+                        new Button({
+                            text: "{i18n>showHistoryButton}",
+                            icon: "sap-icon://history",
+                            type: "Transparent",
+                            press: this.onShowHistory.bind(this)
                         })
                     ]
                 });
@@ -398,6 +405,90 @@ sap.ui.define([
             oLocalModel.setProperty("/currentPeriod", dCurrentPeriod);
             oLocalModel.setProperty("/previousPeriod", dPreviousPeriod);
         },
+        onShowHistory: function (oEvent) {
+            var oButton = oEvent.getSource();
+            var oContext = oButton.getBindingContext();
+
+            if (!oContext) {
+                MessageToast.show("No data available");
+                return;
+            }
+
+            var sProjectElement = oContext.getProperty("ProjectElement");
+            var oResourceBundle = this.getView().getModel("i18n").getResourceBundle();
+            var oModel = this.getView().getModel();
+            var that = this;
+
+            var sNavPath = oContext.getPath() + "/to_Cycle";
+
+            this.getView().setBusy(true);
+
+            oModel.read(sNavPath, {
+                success: function (oData) {
+                    that.getView().setBusy(false);
+
+                    var oHistoryModel = new sap.ui.model.json.JSONModel({
+                        results: oData.results
+                    });
+
+                    if (that._oHistoryDialog) {
+                        that._oHistoryDialog.destroy();
+                        that._oHistoryDialog = null;
+                    }
+
+                    var oHistoryTable = new Table({
+                        columns: [
+                            new Column({ header: new Label({ text: oResourceBundle.getText("historyProjectColumn") }) }),
+                            new Column({ header: new Label({ text: oResourceBundle.getText("historyWPColumn") }) }),
+                            new Column({ header: new Label({ text: oResourceBundle.getText("historyPeriodColumn") }) })
+                        ]
+                    });
+
+                    oHistoryTable.bindItems({
+                        path: "history>/results",
+                        template: new ColumnListItem({
+                            cells: [
+                                new Text({ text: "{history>customerprojectid}" }),
+                                new Text({ text: "{history>customerprojectworkpackage}" }),
+                                new Text({
+                                    text: {
+                                        path: "history>reportingperiodstart",
+                                        type: new sap.ui.model.type.Date({ pattern: "dd.MM.yyyy" })
+                                    }
+                                })
+                            ]
+                        })
+                    });
+
+                    that._oHistoryDialog = new Dialog({
+                        title: oResourceBundle.getText("historyDialogTitle") + " - " + sProjectElement,
+                        contentWidth: "40rem",
+                        resizable: true,
+                        draggable: true,
+                        content: [oHistoryTable],
+                        beginButton: new Button({
+                            text: oResourceBundle.getText("historyCloseButton"),
+                            press: function () {
+                                that._oHistoryDialog.close();
+                            }
+                        }),
+                        afterClose: function () {
+                            that._oHistoryDialog.destroy();
+                            that._oHistoryDialog = null;
+                        }
+                    });
+
+                    that._oHistoryDialog.setModel(oHistoryModel, "history");
+                    that.getView().addDependent(that._oHistoryDialog);
+                    that._oHistoryDialog.open();
+                },
+                error: function () {
+                    that.getView().setBusy(false);
+                    MessageBox.error(oResourceBundle.getText("saveError"));
+                }
+            });
+        },
+
         onSearch: function (oEvent) {
             var aFilters = [];
             var sQuery = oEvent.getParameter("newValue");

@@ -78,14 +78,20 @@
                     <Column width="7rem" minScreenWidth="tablet" popinDisplay="Block">
                         <header><Label text="{i18n>initBudgetColumn}"/></header>
                     </Column>
-                    <Column width="15rem" minScreenWidth="tablet" popinDisplay="Block">
-                        <header><Label text="{i18n>progressColumn}"/></header>
+                    <Column width="4.5rem" minScreenWidth="tablet" popinDisplay="Block">
+                        <header><Label text="{i18n>progressInputColumn}"/></header>
+                    </Column>
+                    <Column width="10rem" minScreenWidth="tablet" popinDisplay="Block">
+                        <header><Label text="{i18n>progressBarColumn}"/></header>
                     </Column>
                     <Column width="5rem" minScreenWidth="tablet" popinDisplay="Block">
                         <header><Label text="{i18n>remainingDaysColumn}"/></header>
                     </Column>
                     <Column width="14rem" minScreenWidth="tablet" popinDisplay="Block">
                         <header><Label text="{i18n>lastCycleColumn}"/></header>
+                    </Column>
+                    <Column width="8rem" minScreenWidth="tablet" popinDisplay="Block" hAlign="Center">
+                        <header><Label text=""/></header>
                     </Column>
                 </columns>
             </Table>
