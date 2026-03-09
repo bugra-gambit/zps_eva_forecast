@@ -1,17 +1,39 @@
-<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
-    <SelectDialog id="projectValueHelpDialog" 
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:formatter="com.gambit.evaforecast.model.formatter">
+    <TableSelectDialog id="projectValueHelpDialog" 
                   title="{i18n>projectSelectTitle}" 
                   multiSelect="false" 
                   rememberSelections="false" 
+                  contentWidth="60rem"
                   confirm="onProjectVHConfirm" 
                   cancel="onProjectVHCancel"
                   search="onProjectVHSearch"
                   items="{proj>/results}">
-        <StandardListItem title="{proj>Project}" 
-                          description="{proj>ProjectDescription}">
+        <columns>
+            <Column><header><Label text="{i18n>projectCol}" /></header></Column>
+            <Column><header><Label text="{i18n>projectDescCol}" /></header></Column>
+            <Column demandPopin="true" minScreenWidth="Tablet"><header><Label text="{i18n>projectParentCol}" /></header></Column>
+            <Column demandPopin="true" minScreenWidth="Desktop"><header><Label text="{i18n>projectStartCol}" /></header></Column>
+            <Column demandPopin="true" minScreenWidth="Desktop"><header><Label text="{i18n>projectEndCol}" /></header></Column>
+            <Column demandPopin="true" minScreenWidth="Desktop"><header><Label text="{i18n>projectIntervalCol}" /></header></Column>
+        </columns>
+        <ColumnListItem>
             <customData>
                 <core:CustomData key="uuid" value="{proj>ProjectUUID}" />
             </customData>
-        </StandardListItem>
-    </SelectDialog>
+            <cells>
+                <Text text="{proj>Project}" />
+                <Text text="{proj>ProjectDescription}" />
+                <Text text="{proj>YY1_ParentProject_Cpr}" />
+                <Text text="{
+                    path: 'proj>ProjectStartDate',
+                    formatter: '.formatter.dateFromJson'
+                }" />
+                <Text text="{
+                    path: 'proj>ProjectEndDate',
+                    formatter: '.formatter.dateFromJson'
+                }" />
+                <Text text="{proj>YY1_EVAIntervall_Cpr}" />
+            </cells>
+        </ColumnListItem>
+    </TableSelectDialog>
 </core:FragmentDefinition>

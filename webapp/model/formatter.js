@@ -26,6 +26,31 @@ sap.ui.define([], function () {
                 text += " " + currency;
             }
             return text;
+        },
+        /**
+         * Formats JSON Date string to dd.MM.yyyy
+         */
+        dateFromJson: function (date) {
+            if (!date) return "";
+            var oDate;
+            if (typeof date === "string") {
+                if (date.indexOf("/Date(") === 0) {
+                    oDate = new Date(parseInt(date.slice(6, -2), 10));
+                } else {
+                    oDate = new Date(date);
+                }
+            } else if (date instanceof Date) {
+                oDate = date;
+            } else {
+                return "";
+            }
+            if (isNaN(oDate.getTime())) {
+                return "";
+            }
+            var sMonth = String(oDate.getMonth() + 1).padStart(2, '0');
+            var sDay = String(oDate.getDate()).padStart(2, '0');
+            var sYear = oDate.getFullYear();
+            return sDay + "." + sMonth + "." + sYear;
         }
     };
 });

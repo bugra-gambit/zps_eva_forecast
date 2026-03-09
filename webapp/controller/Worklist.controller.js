@@ -13,11 +13,13 @@ sap.ui.define([
     "sap/m/Dialog",
     "sap/m/Table",
     "sap/m/Column",
-    "sap/m/Label"
-], (Controller, Filter, FilterOperator, MessageToast, MessageBox, ColumnListItem, Text, Input, VBox, ProgressIndicator, Button, Dialog, Table, Column, Label) => {
+    "sap/m/Label",
+    "com/gambit/evaforecast/model/formatter"
+], (Controller, Filter, FilterOperator, MessageToast, MessageBox, ColumnListItem, Text, Input, VBox, ProgressIndicator, Button, Dialog, Table, Column, Label, formatter) => {
     "use strict";
 
     return Controller.extend("com.gambit.evaforecast.controller.Worklist", {
+        formatter: formatter,
         onInit() {
             // local JSON model for input text
             var oLocal = new sap.ui.model.json.JSONModel({
@@ -165,6 +167,7 @@ sap.ui.define([
 
             oOData.read("/ZI_PS_EVA_PROJECT", {
                 success: function (oData) {
+                    debugger
                     that.getView().getModel("proj").setProperty("/results", oData.results);
                     that.getView().setBusy(false);
                     // if dialog exists, also make sure it has fresh reference
@@ -199,11 +202,11 @@ sap.ui.define([
                 var sUUID = oSelected.data("uuid");
 
 
-                var sText = oSelected.getTitle() + " - " + oSelected.getDescription();
+                var oSelectedData = oSelected.getBindingContext("proj").getObject();
+                var sText = oSelectedData.Project + " - " + oSelectedData.ProjectDescription;
                 this._selectedProject = sUUID;
                 this.getView().getModel("local").setProperty("/selectedProjectText", sText);
 
-                var oSelectedData = oSelected.getBindingContext("proj").getObject();
                 var oLocal = this.getView().getModel("local");
 
                 oLocal.setProperty("/selectedProjectId", oSelectedData.Project || "");
@@ -438,12 +441,36 @@ sap.ui.define([
 
                     var oHistoryTable = new Table({
                         columns: [
-                            new Column({ header: new Label({ text: oResourceBundle.getText("historyProjectColumn") }) }),
-                            new Column({ header: new Label({ text: oResourceBundle.getText("historyWPColumn") }) }),
-                            new Column({ header: new Label({ text: oResourceBundle.getText("historyPeriodColumn") }) }),
-                            new Column({ header: new Label({ text: oResourceBundle.getText("historyPeriodEndColumn") }) }),
-                            new Column({ header: new Label({ text: oResourceBundle.getText("historyLastChangedAtColumn") }) }),
-                            new Column({ header: new Label({ text: oResourceBundle.getText("historyLastChangedByColumn") }) })
+                            new Column({
+                                header: new Label({
+                                    text: oResourceBundle.getText("historyProjectColumn")
+                                })
+                            }),
+                            new Column({
+                                header: new Label({
+                                    text: oResourceBundle.getText("historyWPColumn")
+                                })
+                            }),
+                            new Column({
+                                header: new Label({
+                                    text: oResourceBundle.getText("historyPeriodColumn")
+                                })
+                            }),
+                            new Column({
+                                header: new Label({
+                                    text: oResourceBundle.getText("historyPeriodEndColumn")
+                                })
+                            }),
+                            new Column({
+                                header: new Label({
+                                    text: oResourceBundle.getText("historyLastChangedAtColumn")
+                                })
+                            }),
+                            new Column({
+                                header: new Label({
+                                    text: oResourceBundle.getText("historyLastChangedByColumn")
+                                })
+                            })
                         ]
                     });
 
@@ -451,27 +478,39 @@ sap.ui.define([
                         path: "history>/results",
                         template: new ColumnListItem({
                             cells: [
-                                new Text({ text: "{history>customerprojectid}" }),
-                                new Text({ text: "{history>customerprojectworkpackage}" }),
+                                new Text({
+                                    text: "{history>customerprojectid}"
+                                }),
+                                new Text({
+                                    text: "{history>customerprojectworkpackage}"
+                                }),
                                 new Text({
                                     text: {
                                         path: "history>reportingperiodstart",
-                                        type: new sap.ui.model.type.Date({ pattern: "dd.MM.yyyy" })
+                                        type: new sap.ui.model.type.Date({
+                                            pattern: "dd.MM.yyyy"
+                                        })
                                     }
                                 }),
                                 new Text({
                                     text: {
                                         path: "history>reportingperiodend",
-                                        type: new sap.ui.model.type.Date({ pattern: "dd.MM.yyyy" })
+                                        type: new sap.ui.model.type.Date({
+                                            pattern: "dd.MM.yyyy"
+                                        })
                                     }
                                 }),
                                 new Text({
                                     text: {
                                         path: "history>lastchangedat",
-                                        type: new sap.ui.model.type.DateTime({ pattern: "dd.MM.yyyy HH:mm" })
+                                        type: new sap.ui.model.type.DateTime({
+                                            pattern: "dd.MM.yyyy HH:mm"
+                                        })
                                     }
                                 }),
-                                new Text({ text: "{history>lastchangedby}" })
+                                new Text({
+                                    text: "{history>lastchangedby}"
+                                })
                             ]
                         })
                     });
