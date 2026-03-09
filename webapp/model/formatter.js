@@ -51,6 +51,12 @@ sap.ui.define([], function () {
             var sDay = String(oDate.getDate()).padStart(2, '0');
             var sYear = oDate.getFullYear();
             return sDay + "." + sMonth + "." + sYear;
+        },
+        /**
+         * Formats boolean to Yes/No
+         */
+        booleanToYesNo: function (bValue) {
+            return bValue ? "Yes" : "No";
         }
     };
 });

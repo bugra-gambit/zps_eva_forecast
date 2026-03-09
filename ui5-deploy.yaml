@@ -20,6 +20,6 @@ builder:
           name: ZUI_EVA_FORECST
           description: EVA Forecast
           package: ZPS_EVA
-          transport: LYTK902390
+          transport: LYTK902405
         exclude:
           - /test/

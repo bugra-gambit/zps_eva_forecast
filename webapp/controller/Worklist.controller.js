@@ -14,8 +14,11 @@ sap.ui.define([
     "sap/m/Table",
     "sap/m/Column",
     "sap/m/Label",
+    "sap/ui/comp/valuehelpdialog/ValueHelpDialog",
+    "sap/ui/comp/filterbar/FilterBar",
+    "sap/ui/comp/filterbar/FilterGroupItem",
     "com/gambit/evaforecast/model/formatter"
-], (Controller, Filter, FilterOperator, MessageToast, MessageBox, ColumnListItem, Text, Input, VBox, ProgressIndicator, Button, Dialog, Table, Column, Label, formatter) => {
+], (Controller, Filter, FilterOperator, MessageToast, MessageBox, ColumnListItem, Text, Input, VBox, ProgressIndicator, Button, Dialog, Table, Column, Label, ValueHelpDialog, FilterBar, FilterGroupItem, formatter) => {
     "use strict";
 
     return Controller.extend("com.gambit.evaforecast.controller.Worklist", {
@@ -30,9 +33,16 @@ sap.ui.define([
                 selectedProjectEnd: "",
                 selectedProjectInterval: "",
                 selectedProjectParent: "",
-                tableTitle: "Work Packages"
+                tableTitle: "Work Packages",
+                vhTitle: this.getOwnerComponent().getModel("i18n").getResourceBundle().getText("projectSelectTitle")
             });
             this.getView().setModel(oLocal, "local");
+
+            // update default model size limit to allow more than 100 entries in value help
+            var oModel = this.getOwnerComponent().getModel();
+            if (oModel) {
+                oModel.setSizeLimit(10000);
+            }
             // json model that we will fill with projects from OData
             var oProj = new sap.ui.model.json.JSONModel({
                 results: []
@@ -54,6 +64,49 @@ sap.ui.define([
             if (oLocal) {
                 oLocal.setProperty("/tableTitle", "Work Packages (" + count + ")");
             }
+
+            // Work package period logic
+            var aItems = oTable.getItems();
+            if (aItems.length === 0) {
+                return;
+            }
+
+            var dCurrentPeriod = null;
+            var dPreviousPeriod = null;
+
+            for (var i = 0; i < aItems.length; i++) {
+                var oContext = aItems[i].getBindingContext();
+                if (oContext) {
+                    var tempCurrent = oContext.getProperty("CurrentReportingPeriodStart");
+                    var tempPrevious = oContext.getProperty("PreviousReportingPeriodStart");
+
+                    if (tempCurrent || tempPrevious) {
+                        dCurrentPeriod = tempCurrent;
+                        dPreviousPeriod = tempPrevious;
+                        break;
+                    }
+                }
+            }
+
+            if (oLocal) {
+                oLocal.setProperty("/currentPeriod", dCurrentPeriod);
+                oLocal.setProperty("/previousPeriod", dPreviousPeriod);
+            }
+        },
+
+        onVHUpdateFinished: function (oEvent) {
+            var oTableSelectDialog = oEvent.getSource();
+            var oBinding = oTableSelectDialog.getBinding("items");
+            var iCount = 0;
+
+            if (oBinding) {
+                iCount = oBinding.getLength ? oBinding.getLength() : 0;
+            }
+
+            var oResourceBundle = this.getView().getModel("i18n").getResourceBundle();
+            var sTitle = oResourceBundle.getText("projectSelectTitle");
+
+            this.getView().getModel("local").setProperty("/vhTitle", sTitle + " (" + iCount + ")");
         },
 
         onProjectChange: function (oEvent) {
@@ -159,26 +212,6 @@ sap.ui.define([
         },
 
         onProjectValueHelp: function () {
-            var that = this;
-            // read list from OData into json model each time
-            var oOData = this.getView().getModel();
-
-            this.getView().setBusy(true);
-
-            oOData.read("/ZI_PS_EVA_PROJECT", {
-                success: function (oData) {
-                    debugger
-                    that.getView().getModel("proj").setProperty("/results", oData.results);
-                    that.getView().setBusy(false);
-                    // if dialog exists, also make sure it has fresh reference
-                    if (that._oProjectVHDialog) {
-                        that._oProjectVHDialog.setModel(that.getView().getModel("proj"), "proj");
-                    }
-                },
-                error: function () {
-                    that.getView().setBusy(false);
-                }
-            });
             // create fragment once, prefix IDs with the view id to avoid duplicates
             if (!this._oProjectVHDialog) {
                 this._oProjectVHDialog = sap.ui.xmlfragment(
@@ -187,8 +220,6 @@ sap.ui.define([
                     this
                 );
                 this.getView().addDependent(this._oProjectVHDialog);
-                // attach json model as well so binding inside dialog works
-                this._oProjectVHDialog.setModel(this.getView().getModel("proj"), "proj");
             }
             this._oProjectVHDialog.open();
         },
@@ -202,7 +233,7 @@ sap.ui.define([
                 var sUUID = oSelected.data("uuid");
 
 
-                var oSelectedData = oSelected.getBindingContext("proj").getObject();
+                var oSelectedData = oSelected.getBindingContext().getObject();
                 var sText = oSelectedData.Project + " - " + oSelectedData.ProjectDescription;
                 this._selectedProject = sUUID;
                 this.getView().getModel("local").setProperty("/selectedProjectText", sText);
@@ -213,19 +244,11 @@ sap.ui.define([
 
 
 
-                oLocal.setProperty("/selectedProjectStart", oSelectedData.ProjectStartDate ? this._formatDate(oSelectedData.ProjectStartDate) : "");
-                oLocal.setProperty("/selectedProjectEnd", oSelectedData.ProjectEndDate ? this._formatDate(oSelectedData.ProjectEndDate) : "");
+                oLocal.setProperty("/selectedProjectStart", "");
+                oLocal.setProperty("/selectedProjectEnd", "");
+                oLocal.setProperty("/selectedProjectInterval", "");
 
-
-                var sInterval = oSelectedData.YY1_EVAIntervall_Cpr || "";
-                if (sInterval === "101") {
-                    sInterval = "101: weekly";
-                } else if (sInterval === "102") {
-                    sInterval = "102: monthly";
-                }
-                oLocal.setProperty("/selectedProjectInterval", sInterval);
-
-                oLocal.setProperty("/selectedProjectParent", oSelectedData.YY1_ParentProject_Cpr || "");
+                oLocal.setProperty("/selectedProjectParent", oSelectedData.ParentProject || "");
             }
             this._oProjectVHDialog.close();
         },
@@ -271,7 +294,9 @@ sap.ui.define([
                 oFilter = new Filter({
                     filters: [
                         new Filter("Project", FilterOperator.Contains, sValue),
-                        new Filter("ProjectDescription", FilterOperator.Contains, sValue)
+                        new Filter("ProjectDescription", FilterOperator.Contains, sValue),
+                        new Filter("ParentProject", FilterOperator.Contains, sValue),
+                        new Filter("ParentProjectDescription", FilterOperator.Contains, sValue)
                     ],
                     and: false
                 });
@@ -375,39 +400,6 @@ sap.ui.define([
                 }.bind(this)
             });
         },
-        onTableUpdateFinished: function (oEvent) {
-            var oTable = oEvent.getSource();
-            var aItems = oTable.getItems();
-
-
-            if (aItems.length === 0) {
-                return;
-            }
-
-            var oLocalModel = this.getView().getModel("local");
-            var dCurrentPeriod = null;
-            var dPreviousPeriod = null;
-
-
-            for (var i = 0; i < aItems.length; i++) {
-                var oContext = aItems[i].getBindingContext();
-                if (oContext) {
-                    var tempCurrent = oContext.getProperty("CurrentReportingPeriodStart");
-                    var tempPrevious = oContext.getProperty("PreviousReportingPeriodStart");
-
-
-                    if (tempCurrent || tempPrevious) {
-                        dCurrentPeriod = tempCurrent;
-                        dPreviousPeriod = tempPrevious;
-                        break;
-                    }
-                }
-            }
-
-
-            oLocalModel.setProperty("/currentPeriod", dCurrentPeriod);
-            oLocalModel.setProperty("/previousPeriod", dPreviousPeriod);
-        },
         onShowHistory: function (oEvent) {
             var oButton = oEvent.getSource();
             var oContext = oButton.getBindingContext();
@@ -463,6 +455,16 @@ sap.ui.define([
                             }),
                             new Column({
                                 header: new Label({
+                                    text: oResourceBundle.getText("historyValuePocColumn")
+                                })
+                            }),
+                            new Column({
+                                header: new Label({
+                                    text: oResourceBundle.getText("historyValueEtcColumn")
+                                })
+                            }),
+                            new Column({
+                                header: new Label({
                                     text: oResourceBundle.getText("historyLastChangedAtColumn")
                                 })
                             }),
@@ -501,6 +503,12 @@ sap.ui.define([
                                     }
                                 }),
                                 new Text({
+                                    text: "{history>value_poc}"
+                                }),
+                                new Text({
+                                    text: "{history>value_etc}"
+                                }),
+                                new Text({
                                     text: {
                                         path: "history>lastchangedat",
                                         type: new sap.ui.model.type.DateTime({
@@ -517,7 +525,7 @@ sap.ui.define([
 
                     that._oHistoryDialog = new Dialog({
                         title: oResourceBundle.getText("historyDialogTitle") + " - " + sProjectElement,
-                        contentWidth: "60rem",
+                        contentWidth: "65rem",
                         contentHeight: "25rem",
                         resizable: true,
                         draggable: true,

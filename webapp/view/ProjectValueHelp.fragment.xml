@@ -1,38 +1,44 @@
 <core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:formatter="com.gambit.evaforecast.model.formatter">
     <TableSelectDialog id="projectValueHelpDialog" 
-                  title="{i18n>projectSelectTitle}" 
+                  title="{local>/vhTitle}" 
                   multiSelect="false" 
                   rememberSelections="false" 
-                  contentWidth="60rem"
+                  contentWidth="80rem"
+                  updateFinished="onVHUpdateFinished"
                   confirm="onProjectVHConfirm" 
                   cancel="onProjectVHCancel"
                   search="onProjectVHSearch"
-                  items="{proj>/results}">
+                  items="{
+                      path: '/ZI_CustomerProjectVH',
+                      length: 10000,
+                      parameters: {
+                          select: 'ProjectUUID,Project,ProjectDescription,EntProjectIsConfidential,ParentProject,ParentProjectDescription,cntInProgress,cntTeamMember'
+                      }
+                  }">
         <columns>
             <Column><header><Label text="{i18n>projectCol}" /></header></Column>
             <Column><header><Label text="{i18n>projectDescCol}" /></header></Column>
+            <Column demandPopin="true" minScreenWidth="Tablet"><header><Label text="{i18n>projectIsConfidentialCol}" /></header></Column>
             <Column demandPopin="true" minScreenWidth="Tablet"><header><Label text="{i18n>projectParentCol}" /></header></Column>
-            <Column demandPopin="true" minScreenWidth="Desktop"><header><Label text="{i18n>projectStartCol}" /></header></Column>
-            <Column demandPopin="true" minScreenWidth="Desktop"><header><Label text="{i18n>projectEndCol}" /></header></Column>
-            <Column demandPopin="true" minScreenWidth="Desktop"><header><Label text="{i18n>projectIntervalCol}" /></header></Column>
+            <Column demandPopin="true" minScreenWidth="Desktop"><header><Label text="{i18n>projectParentDescCol}" /></header></Column>
+            <Column demandPopin="true" minScreenWidth="Desktop"><header><Label text="{i18n>projectCntInProgressCol}" /></header></Column>
+            <Column demandPopin="true" minScreenWidth="Desktop"><header><Label text="{i18n>projectCntTeamMemberCol}" /></header></Column>
         </columns>
         <ColumnListItem>
             <customData>
-                <core:CustomData key="uuid" value="{proj>ProjectUUID}" />
+                <core:CustomData key="uuid" value="{ProjectUUID}" />
             </customData>
             <cells>
-                <Text text="{proj>Project}" />
-                <Text text="{proj>ProjectDescription}" />
-                <Text text="{proj>YY1_ParentProject_Cpr}" />
+                <Text text="{Project}" />
+                <Text text="{ProjectDescription}" />
                 <Text text="{
-                    path: 'proj>ProjectStartDate',
-                    formatter: '.formatter.dateFromJson'
+                    path: 'EntProjectIsConfidential',
+                    formatter: '.formatter.booleanToYesNo'
                 }" />
-                <Text text="{
-                    path: 'proj>ProjectEndDate',
-                    formatter: '.formatter.dateFromJson'
-                }" />
-                <Text text="{proj>YY1_EVAIntervall_Cpr}" />
+                <Text text="{ParentProject}" />
+                <Text text="{ParentProjectDescription}" />
+                <Text text="{cntInProgress}" />
+                <Text text="{cntTeamMember}" />
             </cells>
         </ColumnListItem>
     </TableSelectDialog>
